@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Tutor</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 10px;
+        margin: 10px;
+        background-color: white;
+        height: 100vh;
+        text-align: center;
+        color: black;
+        overflow: hidden;
+      }
+
+      h1 {
+        font-size: 70px;
+        margin: 30px;
+      }
+
+      p {
+        color: black;
+      }
+
+      #selectionMenu {
+        position: fixed;
+        top: 70px;
+        left: 120px;
+        right: 120px;
+        bottom: 110px;
+        width: auto;
+        height: auto;
+        box-sizing: border-box;
+        border: 7px solid black;
+        padding: 50px;
+        border-radius: 40px;
+        overflow: auto;
+      }
+
+      ::selection {
+        background: black; /* Change highlight background color */
+        color: white; /* Change highlight text color */
+      }
+
+      .hamburger {
+        z-index: 3;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        cursor: pointer;
+        z-index: 1;
+      }
+
+      .hamburger span {
+        z-index: 3;
+        display: block;
+        width: 30px;
+        height: 3px;
+        background-color: black;
+        margin-bottom: 5px;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .hamburger.active {
+        z-index: 3;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        z-index: 3;
+        transform: translateY(8px) rotate(45deg);
+      }
+
+      .hamburger.active span:nth-child(2) {
+        z-index: 3;
+        opacity: 0;
+      }
+
+      .hamburger.active span:nth-child(3) {
+        z-index: 3;
+        transform: translateY(-8px) rotate(-45deg);
+      }
+
+      /* Add the following CSS for the menu */
+      .menu {
+        z-index: 2;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 70%;
+        max-width: 300px;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (max-width: 1024px) {
+        .menu {
+          width: 100%;
+          max-width: 100%;
+          left: -100%;
+        }
+      }
+
+      .menu.active {
+        left: 0;
+      }
+
+      .menu a {
+        font-size: 24px;
+        color: black;
+        text-decoration: none;
+      }
+
+      #toggleSign {
+        top: 15px;
+        right: 15px;
+        position: fixed;
+      }
+
+      #signup {
+        float: left;
+      }
+
+      #login {
+        float: right;
+      }
+      input {
+        background-color: white;
+        border: 5px solid black;
+        border-radius: 40px;
+        padding: 5px;
+        margin: 8px;
+        height: 35px;
+      }
+      button {
+        background-color: white;
+        border: 5px solid black;
+        border-radius: 40px;
+        padding: 5px;
+        margin: 8px;
+        box-sizing: border-box;
+        height: 60px;
+        width: 60px;
+        cursor: pointer;
+      }
+      .toHide {
+        display: none;
+      }
+    </style>
+
+    <script>
+      let authMenuLogin = true;
+
+      //Toggles the hamburger
+      function toggleMenu() {
+        const hamburger = document.querySelector(".hamburger");
+        const menu = document.querySelector(".menu");
+
+        hamburger.classList.toggle("active");
+        menu.classList.toggle("active");
+      }
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" || event.keyCode === 27) {
+          toggleMenu();
+        }
+      });
+
+      //Toggles the auth menu
+      function toggleAuthMenu() {
+        authMenuLogin = !authMenuLogin;
+        if (authMenuLogin == true) {
+          document.getElementById("logOrSignSign").innerHTML = "Login";
+          document.getElementById("emailSlot").style.display = "none";
+          document.getElementById("passwordConfirm").style.display = "none";
+          document.getElementById("passwordSlot").setAttribute("autocomplete", "current-password");
+          document.getElementById("hiddenBreak").style.display = "none";
+          document.getElementById("hiddenBreak2").style.display = "none";
+        } else {
+          document.getElementById("logOrSignSign").innerHTML = "Signup";
+          document.getElementById("emailSlot").style.display = "inline";
+          document.getElementById("passwordConfirm").style.display = "inline";
+          document.getElementById("passwordSlot").setAttribute("autocomplete", "new-password");
+          document.getElementById("hiddenBreak").style.display = "inline";
+          document.getElementById("hiddenBreak2").style.display = "inline";
+        }
+      }
+
+      //Validating logins
+      function validateLogin() {
+
+        //Getting inputted data
+        const usernameObtained = document.getElementById("usernameSlot").value;
+        const passwordObtained = document.getElementById("passwordSlot").value;
+
+        //Making sure nothing is blank
+        if (usernameObtained == "") {
+          alert("Please fill all the boxes with your information.");
+          return;
+        };
+        if (passwordObtained == "") {
+          alert("Please fill all the boxes with your information.");
+          return;
+        };
+
+        $.ajax({
+          url: "/validateLogin",
+          type: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify({
+            input_json: {
+              username: usernameObtained,
+              password: passwordObtained
+            },
+            csrf_token: "{{ csrf_token() }}",
+          }),
+          beforeSend: function (xhr, settings) {
+            if (
+              !/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) &&
+              !this.crossDomain
+            ) {
+              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token() }}");
+            }
+          },
+          success: function (response) {
+            alert(response);
+            if (response != "Invalid username or password.") {
+              window.location.href = '/';
+            }
+          },
+          error: function (error) {
+            alert(error);
+          },
+        });
+      }
+
+      //Sending signup requests
+      function postToSignup() {
+
+        //Getting inputted data
+        const usernameObtained = document.getElementById("usernameSlot").value;
+        const passwordObtained = document.getElementById("passwordSlot").value;
+        let emailObtained
+        if (authMenuLogin == false) {
+          emailObtained = document.getElementById("emailSlot").value;
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (emailRegex.test(emailObtained) == false) {
+            alert("Please enter a valid email.");
+            return;
+          };
+
+          //Making sure the email slot is not blank
+          if (emailObtained == "") {
+            alert("Please fill all the boxes with your information.");
+            return;
+          };
+
+          //Making sure passwords are not too short
+          if (document.getElementById("passwordSlot").value.length < 9) {
+            alert("Passwords must be 9 characters or longer.")
+            return
+          }
+
+          //Making sure passwords match
+          if (document.getElementById("passwordSlot").value != document.getElementById("passwordConfirm").value) {
+            alert("Please make sure to correctly confirm your password.");
+            return
+          }
+        };
+
+        //Making sure nothing is blank
+        if (usernameObtained == "") {
+          alert("Please fill all the boxes with your information.");
+          return;
+        };
+        if (passwordObtained == "") {
+          alert("Please fill all the boxes with your information.");
+          return;
+        };
+
+        $.ajax({
+          url: "/addUser",
+          type: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify({
+            input_json: {
+              username: usernameObtained,
+              password: passwordObtained,
+              email: emailObtained,
+              banned: null,
+              signupDate: null,
+              banDate: null,
+            },
+            csrf_token: "{{ csrf_token() }}",
+          }),
+          beforeSend: function (xhr, settings) {
+            if (
+              !/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) &&
+              !this.crossDomain
+            ) {
+              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token() }}");
+            }
+          },
+          success: function (response) {
+            alert(response);
+            toggleAuthMenu();
+          },
+          error: function (error) {
+            alert(error);
+          },
+        });
+      }
+
+      function sendInfo() {
+        if (authMenuLogin == true) {
+          validateLogin();
+        } else {
+          postToSignup();
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="menu">
+      <a href="/">Chat</a>
+      <br />
+      <a href="/loginAndSignup">Signup/Login</a>
+      <br />
+      <a href="/">Settings</a>
+      <br />
+      <a href="mailto:josephmcardona@gmail.com">Support</a>
+    </div>
+
+    <button id="toggleSign" onclick="toggleAuthMenu()">Signup</button>
+
+    <form id="infoForm" onsubmit="return false;">
+      <h1 id="logOrSignSign">Login</h1>
+      <input
+        type="text"
+        autocomplete="username"
+        id="usernameSlot"
+        placeholder="Username"
+      />
+      <br />
+      <input
+        type="email"
+        autocomplete="email"
+        class="toHide"
+        id="emailSlot"
+        placeholder="Email"
+      />
+      <br id="hiddenBreak" class="toHide" />
+      <input
+        type="password"
+        autocomplete="new-password"
+        id="passwordSlot"
+        placeholder="Password"
+      />
+      <br />
+      <input
+        type="password"
+        autocomplete="new-password"
+        class="toHide" 
+        id="passwordConfirm"
+        placeholder="Confirm Password"
+      />
+      <br id="hiddenBreak2" class="toHide" />
+      <button id="sumbitInfo" onclick="sendInfo()">Submit</button>
+    </form>
+  </body>
+</html>

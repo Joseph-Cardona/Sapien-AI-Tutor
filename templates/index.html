@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Tutor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 10px;
+        margin: 10px;
+        background-color: #a59a8d;
+        height: 100vh;
+      }
+
+      p {
+        color: black;
+      }
+
+      ::selection {
+        background: black;
+        color: white;
+      }
+
+      #chat {
+        position: fixed;
+        top: 70px;
+        left: 120px;
+        right: 120px;
+        bottom: 110px;
+        width: auto;
+        height: auto;
+        box-sizing: border-box;
+        border: 7px solid black;
+        padding: 20px;
+        border-radius: 40px;
+        overflow: auto;
+        background-color: white;
+      }
+
+      #inputMenu {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        margin: 5px;
+        padding: 5px;
+        width: 500px;
+      }
+      #question {
+        background-color: white;
+        border: 5px solid black;
+        border-radius: 40px;
+        padding: 5px;
+        margin: 0px;
+        height: 35px;
+      }
+      .inputMenuButton {
+        background-color: white;
+        border: 5px solid black;
+        border-radius: 40px;
+        padding: 5px;
+        margin: 0px;
+        box-sizing: border-box;
+        height: 60px;
+        width: 60px;
+        cursor: pointer;
+      }
+      .inputMenuButton:active {
+        border: 6px solid black;
+      }
+      .buttonImage {
+        height: 20px;
+        padding: 0px;
+        margin: 0px;
+      }
+      .dropdown {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+      }
+
+      .dropdown-content-wrapper {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .dropdown-content {
+        padding: 5px 0;
+      }
+
+      .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+
+      .dropdown-content a:hover {
+        background-color: #ddd;
+      }
+
+      .dropdown:hover .dropdown-content-wrapper {
+        display: block;
+      }
+
+      .buttonImage {
+        width: 24px;
+        height: 24px;
+      }
+
+      .dropdown-content-wrapper::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .dropdown-content-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .dropdown-content-wrapper::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+
+      .dropdown-content-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      .dropbtn {
+        font-size: 9px;
+        word-wrap: break-word;
+      }
+
+      .hamburger {
+        z-index: 3;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        cursor: pointer;
+        z-index: 1;
+      }
+
+      .hamburger span {
+        z-index: 3;
+        display: block;
+        width: 30px;
+        height: 3px;
+        background-color: black;
+        margin-bottom: 5px;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .hamburger.active {
+        z-index: 3;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        z-index: 3;
+        transform: translateY(8px) rotate(45deg);
+      }
+
+      .hamburger.active span:nth-child(2) {
+        z-index: 3;
+        opacity: 0;
+      }
+
+      .hamburger.active span:nth-child(3) {
+        z-index: 3;
+        transform: translateY(-8px) rotate(-45deg);
+      }
+
+      .menu {
+        z-index: 2;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 70%;
+        max-width: 300px;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (max-width: 1024px) {
+        .menu {
+          width: 100%;
+          max-width: 100%;
+          left: -100%;
+        }
+      }
+
+      .menu.active {
+        left: 0;
+      }
+
+      .menu a {
+        font-size: 24px;
+        color: black;
+        text-decoration: none;
+      }
+    </style>
+    <script>
+      console.log('test')
+      const username = {{ data.username | tojson }};
+      console.log(username);
+      //TODO: Make the website mobile responsive
+      //TODO: Make a note disclaimer saying the AI may hallucinate
+      //TODO: Don't allow spam requests
+      //TODO: Make it so the page doesn't refresh when the cursor leaves the subject select dropdown menu
+      //TODO: Make it so when you click the subject button the page doesn't refresh
+
+      //Setting the variables
+      let value;
+      let valObtained;
+      const pElement = document.createElement("p");
+      const parentDiv = document.getElementById("chat");
+
+      //Sending a request to the AI
+      function submitChatForm() {
+        const pElement = document.createElement("p");
+        value = document.getElementById("question").value;
+        if (value == "") {
+          alert("Please type something in the message box.");
+          return;
+        }
+        pElement.className = "outputMessage";
+        pElement.innerText = "User: " + value;
+        document.getElementById("chat").appendChild(pElement);
+        $.ajax({
+          url: "/process_string",
+          type: "POST",
+          data: {
+            input_string:
+              "Using the set of tools used for " +
+              document.querySelector(".dropbtn").textContent +
+              " fulfill this request: " +
+              value,
+            csrf_token: "{{ csrf_token() }}",
+          },
+          beforeSend: function (xhr, settings) {
+            if (
+              !/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) &&
+              !this.crossDomain
+            ) {
+              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token() }}");
+            }
+          },
+          success: function (response) {
+            const pElement = document.createElement("p");
+            valObtained = String(response.result);
+            console.log(valObtained);
+            pElement.className = "outputMessage";
+
+            const tempElement = document.createElement("div");
+            tempElement.innerHTML = valObtained;
+            const decodedText = tempElement.textContent;
+
+            pElement.textContent = "AI: " + decodedText;
+
+            document.getElementById("chat").appendChild(pElement);
+            document.getElementById("question").value = "";
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
+      }
+
+      //Lets you press enter to send a message to the AI
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submitChatForm();
+        }
+      });
+
+      //Works the dropdown menu
+      document.addEventListener("DOMContentLoaded", function () {
+        const dropdown = document.getElementById("myDropdown");
+        const options = dropdown.querySelectorAll(".dropdown-content a");
+
+        options.forEach((option) => {
+          option.addEventListener("click", function (e) {
+            e.preventDefault();
+            //Setting the text in the button to the subject
+            const selectedValue = this.textContent;
+            const wordCount = selectedValue.trim().split(/\s+/).length;
+            console.log(wordCount);
+            if (wordCount == 1) {
+              console.log("count is 1");
+              dropdown.querySelector(".dropbtn").innerHTML =
+                selectedValue + "<br><br>";
+            } else {
+              console.log("count is 2");
+              dropdown.querySelector(".dropbtn").textContent = selectedValue;
+            }
+            console.log("Selected option:", selectedValue);
+          });
+        });
+      });
+
+      //Toggles the hamburger
+      function toggleMenu() {
+        const hamburger = document.querySelector(".hamburger");
+        const menu = document.querySelector(".menu");
+
+        hamburger.classList.toggle("active");
+        menu.classList.toggle("active");
+      }
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" || event.keyCode === 27) {
+          toggleMenu();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="menu">
+      <a href="/">Chat</a>
+      <br />
+      <a href="/loginAndSignup">Signup/Login</a>
+      <br />
+      <a href="/">Settings</a>
+      <br />
+      <a href="mailto:josephmcardona@gmail.com">Support</a>
+    </div>
+
+    <div id="chat">
+      <p class="outputMessage">AI: What can I help you with today?</p>
+    </div>
+    <div id="inputMenu">
+      <div id="chatForm">
+        <div class="dropdown" id="myDropdown">
+          <button id="subjectBtn" class="inputMenuButton dropbtn">
+            Any Subject
+          </button>
+          <div class="dropdown-content-wrapper">
+            <div class="dropdown-content">
+              <a>Any Subject</a>
+              <a>Algebra</a>
+              <a>Biology</a>
+              <a>Business Studies</a>
+              <a>Chemistry</a>
+              <a>Computer Science</a>
+              <a>Economics</a>
+              <a>English</a>
+              <a>Environmental Science</a>
+              <a>Foreign Languages</a>
+              <a>Geography</a>
+              <a>Geometry</a>
+              <a>History</a>
+              <a>IT</a>
+              <a>Literature</a>
+              <a>Mathematics</a>
+              <a>Philosophy</a>
+              <a>Physics</a>
+              <a>Science</a>
+              <a>Social Studies</a>
+              <a>Spanish</a>
+              <a>Technology</a>
+              <a>Not Listed</a>
+            </div>
+          </div>
+        </div>
+
+        <input type="text" id="question" placeholder="Message AI Tutor" />
+        <button
+          onclick="submitChatForm()"
+          type="button"
+          class="inputMenuButton"
+        >
+          <img
+            class="buttonImage"
+            src="https://cdn.glitch.global/33cb8556-d0b1-40db-97ce-14ac635dfeba/arrow%20button.png?v=1737594474594"
+            alt="Button Image"
+          />
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
