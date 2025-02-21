@@ -12,6 +12,11 @@ bcrypt = "^4.2.1"
 flask-wtf = "^1.2.2"
 markupsafe = "^3.0.2"
 supabase = "^2.13.0"
+opencv-python = "^4.11.0.86"
+pytesseract = "^0.3.13"
+pyttsx3 = "^2.98"
+speechrecognition = "^3.14.1"
+openai = "^1.63.2"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

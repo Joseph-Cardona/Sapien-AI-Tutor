@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Tutor</title>
@@ -214,6 +216,14 @@
         text-decoration: none;
       }
     </style>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$','$'], ['\\(','\\)']],
+          processEscapes: true
+        }
+      });
+    </script>
     <script>
       console.log('test')
       const username = {{ data.username | tojson }};
@@ -266,14 +276,24 @@
             console.log(valObtained);
             pElement.className = "outputMessage";
 
+            // Configure Showdown to use $ for inline math and $$ for block math
+            const converter = new showdown.Converter({
+              extensions: ['mathjax']
+            });
+
             const tempElement = document.createElement("div");
             tempElement.innerHTML = valObtained;
             const decodedText = tempElement.textContent;
 
-            pElement.textContent = "AI: " + decodedText;
+            const markdownHtml = converter.makeHtml("Sapien: " + decodedText);
+
+            pElement.innerHTML = markdownHtml;
 
             document.getElementById("chat").appendChild(pElement);
             document.getElementById("question").value = "";
+
+            // Trigger MathJax to render the new content
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, pElement]);
           },
           error: function (error) {
             console.log(error);
@@ -346,7 +366,7 @@
     </div>
 
     <div id="chat">
-      <p class="outputMessage">AI: What can I help you with today?</p>
+      <p class="outputMessage">Sapien: What can I help you with today?</p>
     </div>
     <div id="inputMenu">
       <div id="chatForm">

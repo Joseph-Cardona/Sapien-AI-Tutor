@@ -4,12 +4,19 @@ from flask_wtf.csrf import CSRFProtect
 import json
 import os
 import bcrypt
+import speech_recognition as sr
+import pyttsx3
+import cv2
+import pytesseract
+import openai
 from datetime import date
 from supabase import create_client, Client
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 csrf = CSRFProtect(app)
+openai.api_key = os.getenv("OPENAI_API_KEY", "your_default_key_here")
+engine = pyttsx3.init()
 
 # Supabase configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL')
@@ -23,7 +30,7 @@ def get_db():
 
 @app.teardown_appcontext
 def close_db(exception):
-    pass  # Supabase client doesn't need explicit closing
+    pass
 
 @app.route("/")
 def home():
@@ -38,13 +45,30 @@ def loginAndSignup():
 @app.route('/process_string', methods=['POST'])
 @csrf.exempt 
 def process_string():
+    print("checkpoint 0")
     input_string = request.form.get('input_string', '')
     user_login_cookie = request.cookies.get('userLogin')
     if not user_login_cookie:
         return jsonify(result="Please login before using the AI.")
     sanitized_string = escape(input_string)
-    modified_string = sanitized_string.upper()
-    return jsonify(result=modified_string)
+
+    print("checkpoint 2")
+
+    if not sanitized_string:
+        return jsonify({"error": "No question provided"}), 400
+    
+    print("checkpoint 2")
+
+    client = openai.OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": sanitized_string}]
+    )
+    answer = response.choices[0].message.content
+
+    print(answer)
+
+    return jsonify(result=answer)
 
 @app.route('/addUser', methods=['POST'])
 @csrf.exempt 
