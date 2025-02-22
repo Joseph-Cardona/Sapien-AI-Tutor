@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, make_response, g
 from markupsafe import escape
 from flask_wtf.csrf import CSRFProtect
 import json
+import ast
 import os
 import bcrypt
 import speech_recognition as sr
@@ -11,6 +12,8 @@ import pytesseract
 import openai
 from datetime import date
 from supabase import create_client, Client
+
+#chatSummary
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -45,28 +48,42 @@ def loginAndSignup():
 @app.route('/process_string', methods=['POST'])
 @csrf.exempt 
 def process_string():
-    print("checkpoint 0")
+    db = get_db()
+    username = request.cookies.get("userLogin")
     input_string = request.form.get('input_string', '')
     user_login_cookie = request.cookies.get('userLogin')
     if not user_login_cookie:
         return jsonify(result="Please login before using the AI.")
     sanitized_string = escape(input_string)
 
-    print("checkpoint 2")
-
     if not sanitized_string:
         return jsonify({"error": "No question provided"}), 400
-    
-    print("checkpoint 2")
 
+    # Getting question answer from OpenAI API
+    summaryObtained = db.table('loginInfo').select('chatSummary').eq('username', username).execute()
+    questionToSend = "Keeping this summary of previously asked questions in mind: " + str(summaryObtained) + " - " + sanitized_string
     client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": sanitized_string}]
+        messages=[{"role": "user", "content": questionToSend}]
     )
     answer = response.choices[0].message.content
-
     print(answer)
+
+    # Adding to the AI's summary memory
+    reqForSummary = "Summarize this: " + str(answer) + " - And add it to this summary " + str(summaryObtained)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": reqForSummary}]
+    )
+    summaryAnswer = response.choices[0].message.content
+    print(summaryAnswer)
+    addSummaryToDB = (
+        db.table('loginInfo')
+        .update({"chatSummary": summaryAnswer})
+        .eq('username', username)
+        .execute()
+    )
 
     return jsonify(result=answer)
 

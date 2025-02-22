@@ -2,8 +2,14 @@
 <html lang="en">
   <head>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['\\(','\\)']], processEscapes: true},
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Tutor</title>
@@ -216,14 +222,6 @@
         text-decoration: none;
       }
     </style>
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [['$','$'], ['\\(','\\)']],
-          processEscapes: true
-        }
-      });
-    </script>
     <script>
       console.log('test')
       const username = {{ data.username | tojson }};
@@ -272,14 +270,31 @@
           },
           success: function (response) {
             const pElement = document.createElement("p");
-            valObtained = String(response.result);
+            const valObtained = String(response.result);
             console.log(valObtained);
             pElement.className = "outputMessage";
 
             // Configure Showdown to use $ for inline math and $$ for block math
-            const converter = new showdown.Converter({
-              extensions: ['mathjax']
-            });
+            const converter = new showdown.Converter();
+
+            const mathExtension = {
+              type: 'output',
+              filter: function(text) {
+                const inlineMath = text.replace(/\$(.+?)\$/g, function(match, p1) {
+                  return '\\(' + p1 + '\\)';
+                });
+                const blockMath = inlineMath.replace(/\$\$([\s\S]+?)\$\$/g, function(match, p1) {
+                  return '\\[' + p1 + '\\]';
+                });
+                return blockMath;
+              }
+            };
+
+            converter.addExtension(mathExtension, 'mathExtension');
+
+
+            // Add the custom extension to Showdown
+            converter.addExtension(mathExtension, 'mathExtension');
 
             const tempElement = document.createElement("div");
             tempElement.innerHTML = valObtained;
