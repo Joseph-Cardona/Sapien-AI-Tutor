@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="icon" type="image/x-icon" href="https://cdn.glitch.global/33cb8556-d0b1-40db-97ce-14ac635dfeba/Sapian-AI-Tutor-Logo-SVG-Cropped.svg?v=1740275091939">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
@@ -19,6 +20,7 @@
         padding: 10px;
         margin: 10px;
         background-color: #a59a8d;
+        background-image: url('https://cdn.glitch.global/33cb8556-d0b1-40db-97ce-14ac635dfeba/taupeMasterPiece.png?v=1740272864251');
         height: 100vh;
       }
 
@@ -149,6 +151,15 @@
         word-wrap: break-word;
       }
 
+      #logoIcon {
+        z-index: 3;
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        width: 40px;
+        z-index: 1;
+      }
+
       .hamburger {
         z-index: 3;
         position: fixed;
@@ -236,7 +247,7 @@
           document.getElementById("loginLink").setAttribute('href', 'javascript:void(0)');
           document.getElementById("loginLink").setAttribute('onclick', 'askBackendToSignout()');
         } else {
-          document.getElementById("initialMessage").innerHTML = "Sapien: Please login before using the AI.";
+          document.getElementById("initialMessage").innerHTML = "<strong>Sapien:</strong> Please login before using the AI.";
         };
       });
       function askBackendToSignout() {
@@ -270,7 +281,7 @@
           return;
         }
         pElement.className = "outputMessage";
-        pElement.innerText = "User: " + value;
+        pElement.innerHTML = "<strong>" + username + "</strong>: " + value;
         document.getElementById("chat").appendChild(pElement);
         $.ajax({
           url: "/process_string",
@@ -322,7 +333,7 @@
             tempElement.innerHTML = valObtained;
             const decodedText = tempElement.textContent;
 
-            const markdownHtml = converter.makeHtml("Sapien: " + decodedText);
+            const markdownHtml = converter.makeHtml("<strong>Sapien:</strong> " + decodedText);
 
             pElement.innerHTML = markdownHtml;
 
@@ -393,13 +404,19 @@
       <br />
       <a id="loginLink" href="/loginAndSignup">Signup/Login</a>
       <br />
-      <a href="/">Settings</a>
+      <a href="/">Github</a>
+      <br />
+      <a href="/">Credits</a>
+      <br />
+      <a href="/">Terms Of Service</a>
       <br />
       <a href="mailto:josephmcardona@gmail.com">Support</a>
     </div>
 
+    <img id="logoIcon" src="https://cdn.glitch.global/33cb8556-d0b1-40db-97ce-14ac635dfeba/Sapian-AI-Tutor-Logo-PNG-Cropped.png?v=1740274895162"/>
+
     <div id="chat">
-      <p class="outputMessage" id="initialMessage">Sapien: What can I help you with today?</p>
+      <p class="outputMessage" id="initialMessage"><strong>Sapien:</strong> What can I help you with today?</p>
     </div>
     <div id="inputMenu">
       <div id="chatForm">
