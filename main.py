@@ -45,6 +45,13 @@ def home():
 def loginAndSignup():
     return render_template('loginAndSignup.html')
 
+@app.route("/signout")
+@csrf.exempt 
+def signout():
+    response = make_response("Cookie has been deleted")
+    response.delete_cookie('userLogin')
+    return response
+
 @app.route('/process_string', methods=['POST'])
 @csrf.exempt 
 def process_string():
@@ -68,7 +75,6 @@ def process_string():
         messages=[{"role": "user", "content": questionToSend}]
     )
     answer = response.choices[0].message.content
-    print(answer)
 
     # Adding to the AI's summary memory
     reqForSummary = "Summarize this: " + str(answer) + " - And add it to this summary " + str(summaryObtained)
@@ -77,7 +83,6 @@ def process_string():
         messages=[{"role": "user", "content": reqForSummary}]
     )
     summaryAnswer = response.choices[0].message.content
-    print(summaryAnswer)
     addSummaryToDB = (
         db.table('loginInfo')
         .update({"chatSummary": summaryAnswer})

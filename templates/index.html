@@ -12,7 +12,7 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Tutor</title>
+    <title>Sapien AI Tutor</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -223,18 +223,43 @@
       }
     </style>
     <script>
-      console.log('test')
-      const username = {{ data.username | tojson }};
-      console.log(username);
-      //TODO: Make the website mobile responsive
-      //TODO: Make a note disclaimer saying the AI may hallucinate
-      //TODO: Don't allow spam requests
-
       //Setting the variables
       let value;
       let valObtained;
       const pElement = document.createElement("p");
       const parentDiv = document.getElementById("chat");
+      
+      const username = {{ data.username | tojson }};
+      document.addEventListener("DOMContentLoaded", function() {
+        if (username != "None"){
+          document.getElementById("loginLink").innerHTML = "Signout";
+          document.getElementById("loginLink").setAttribute('href', 'javascript:void(0)');
+          document.getElementById("loginLink").setAttribute('onclick', 'askBackendToSignout()');
+        } else {
+          console.log("user is not logged in");
+        };
+      });
+      function askBackendToSignout() {
+        fetch('/signout', {
+          method: 'GET',
+          credentials: 'include' // This ensures cookies are sent with the request
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Signed out successfully');
+            location.reload();
+          } else {
+            console.error('Signout failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error during signout:', error);
+        });
+      }
+      
+      //TODO: Make the website mobile responsive
+      //TODO: Make a note disclaimer saying the AI may hallucinate
+      //TODO: Don't allow spam requests
 
       //Sending a request to the AI
       function submitChatForm() {
@@ -269,7 +294,6 @@
           success: function (response) {
             const pElement = document.createElement("p");
             const valObtained = String(response.result);
-            console.log(valObtained);
             pElement.className = "outputMessage";
 
             //Configures Showdown to use $ for inline math and $$ for block math
@@ -322,11 +346,6 @@
         }
       });
 
-      //Works the image select button
-      function tellToUpload() {
-        document.getElementById('imageInput').click();
-      };
-
       //Works the dropdown menu
       document.addEventListener("DOMContentLoaded", function () {
         const dropdown = document.getElementById("myDropdown");
@@ -338,16 +357,12 @@
             //Setting the text in the button to the subject
             const selectedValue = this.textContent;
             const wordCount = selectedValue.trim().split(/\s+/).length;
-            console.log(wordCount);
             if (wordCount == 1) {
-              console.log("count is 1");
               dropdown.querySelector(".dropbtn").innerHTML =
                 selectedValue + "<br><br>";
             } else {
-              console.log("count is 2");
               dropdown.querySelector(".dropbtn").textContent = selectedValue;
             }
-            console.log("Selected option:", selectedValue);
           });
         });
       });
@@ -376,7 +391,7 @@
     <div class="menu">
       <a href="/">Chat</a>
       <br />
-      <a href="/loginAndSignup">Signup/Login</a>
+      <a id="loginLink" href="/loginAndSignup">Signup/Login</a>
       <br />
       <a href="/">Settings</a>
       <br />
@@ -416,14 +431,15 @@
               <a>Social Studies</a>
               <a>Spanish</a>
               <a>Technology</a>
-              <a>Not Listed</a>
+              <a>Other:</a>
             </div>
           </div>
         </div>
 
         <input type="text" id="question" placeholder="Message AI Tutor" />
-        <input type="file" id="imageInput" style="display: none;" accept=".jpg, .jpeg, .png"></input>
-        <button id="fileUploadButton" class="inputMenuButton dropbtn" onclick="tellToUpload()">File Upload</button>
+        <!-- Scrapped the file upload feature -->
+        <!--<input type="file" id="imageInput" style="display: none;" accept=".jpg, .jpeg, .png"></input>
+        <button id="fileUploadButton" class="inputMenuButton dropbtn" onclick="tellToUpload()">File Upload</button>-->
         <button
           onclick="submitChatForm()"
           type="button"
