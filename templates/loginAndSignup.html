@@ -164,6 +164,53 @@
     <script>
       let authMenuLogin = true;
 
+      const username = {{ data.username | tojson }};
+      document.addEventListener("DOMContentLoaded", function() {
+        if (username != "None"){
+          document.getElementById("loginLink").innerHTML = "Signout";
+          document.getElementById("loginLink").setAttribute('href', 'javascript:void(0)');
+          document.getElementById("loginLink").setAttribute('onclick', 'askBackendToSignout()');
+        } else {
+          document.getElementById("initialMessage").innerHTML = "<strong>Sapien:</strong> Please login before using the AI.";
+        };
+      });
+      function askBackendToSignout() {
+        fetch('/signout', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Signed out successfully');
+            location.reload();
+          } else {
+            console.error('Signout failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error during signout:', error);
+        });
+      }
+
+      // Sends a request to the backend to delete the past chat summaries
+      function clearAIMemory() {
+        fetch('/clearAIMemory', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('memory cleared');
+            location.reload();
+          } else {
+            console.error('memory clear failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error during signout:', error);
+        });
+      }
+
       //Toggles the hamburger
       function toggleMenu() {
         const hamburger = document.querySelector(".hamburger");
@@ -347,9 +394,15 @@
     <div class="menu">
       <a href="/">Chat</a>
       <br />
-      <a href="/loginAndSignup">Signup/Login</a>
+      <a id="loginLink" href="/loginAndSignup">Signup/Login</a>
       <br />
-      <a href="/">Settings</a>
+      <a href="https://github.com/Joseph-Cardona/Sapien-AI-Tutor" target="_blank" rel="noopener noreferrer">Github</a>
+      <br />
+      <a href="/credits">Credits</a>
+      <br />
+      <a href="/tos">Terms Of Service</a>
+      <br />
+      <a href="javascript:void(0)" onclick="clearAIMemory()">Clear Memory</a>
       <br />
       <a href="mailto:josephmcardona@gmail.com">Support</a>
     </div>

@@ -38,7 +38,9 @@ def home():
 
 @app.route("/loginAndSignup")
 def loginAndSignup():
-    return render_template('loginAndSignup.html')
+    usrnm = request.cookies.get("userLogin")
+    data = {"username": str(usrnm)}
+    return render_template('loginAndSignup.html', data=data)
 
 @app.route("/signout")
 @csrf.exempt 
