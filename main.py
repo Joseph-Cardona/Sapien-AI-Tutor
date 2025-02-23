@@ -42,6 +42,18 @@ def loginAndSignup():
     data = {"username": str(usrnm)}
     return render_template('loginAndSignup.html', data=data)
 
+@app.route("/credits")
+def credits():
+    usrnm = request.cookies.get("userLogin")
+    data = {"username": str(usrnm)}
+    return render_template('credits.html', data=data)
+
+@app.route("/tos")
+def tos():
+    usrnm = request.cookies.get("userLogin")
+    data = {"username": str(usrnm)}
+    return render_template('tos.html', data=data)
+    
 @app.route("/signout")
 @csrf.exempt 
 def signout():

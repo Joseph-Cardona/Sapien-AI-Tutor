@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Tutor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 10px;
+        margin: 10px;
+        background-color: #a59a8d;
+        background-image: url('https://cdn.glitch.global/33cb8556-d0b1-40db-97ce-14ac635dfeba/taupeMasterPiece.png?v=1740272864251');
+        height: 100vh;
+        text-align: center;
+        color: black;
+        overflow: hidden;
+      }
+
+      #logoIcon {
+        z-index: 3;
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        width: 40px;
+        z-index: 1;
+      }
+
+      h1 {
+        font-size: 70px;
+        margin: 30px;
+      }
+
+      p {
+        color: black;
+      }
+
+      #selectionMenu {
+        position: fixed;
+        top: 70px;
+        left: 120px;
+        right: 120px;
+        bottom: 110px;
+        width: auto;
+        height: auto;
+        box-sizing: border-box;
+        border: 7px solid black;
+        padding: 50px;
+        border-radius: 40px;
+        overflow: auto;
+      }
+
+      ::selection {
+        background: black; /* Change highlight background color */
+        color: white; /* Change highlight text color */
+      }
+
+      .hamburger {
+        z-index: 3;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        cursor: pointer;
+        z-index: 1;
+      }
+
+      .hamburger span {
+        z-index: 3;
+        display: block;
+        width: 30px;
+        height: 3px;
+        background-color: black;
+        margin-bottom: 5px;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .hamburger.active {
+        z-index: 3;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        z-index: 3;
+        transform: translateY(8px) rotate(45deg);
+      }
+
+      .hamburger.active span:nth-child(2) {
+        z-index: 3;
+        opacity: 0;
+      }
+
+      .hamburger.active span:nth-child(3) {
+        z-index: 3;
+        transform: translateY(-8px) rotate(-45deg);
+      }
+
+      /* Add the following CSS for the menu */
+      .menu {
+        z-index: 2;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 70%;
+        max-width: 300px;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (max-width: 1024px) {
+        .menu {
+          width: 100%;
+          max-width: 100%;
+          left: -100%;
+        }
+      }
+
+      .menu.active {
+        left: 0;
+      }
+
+      .menu a {
+        font-size: 24px;
+        color: black;
+        text-decoration: none;
+      }
+
+      #toggleSign {
+        top: 15px;
+        right: 15px;
+        position: fixed;
+      }
+
+      #signup {
+        float: left;
+      }
+
+      #login {
+        float: right;
+      }
+      input {
+        background-color: white;
+        border: 5px solid black;
+        border-radius: 40px;
+        padding: 5px;
+        margin: 8px;
+        height: 35px;
+      }
+      button {
+        background-color: white;
+        color: black;
+        border: 5px solid black;
+        border-radius: 40px;
+        padding: 5px;
+        margin: 8px;
+        box-sizing: border-box;
+        height: 60px;
+        width: 60px;
+        cursor: pointer;
+      }
+      .toHide {
+        display: none;
+      }
+    </style>
+
+    <script>
+      const username = {{ data.username | tojson }};
+      document.addEventListener("DOMContentLoaded", function() {
+        if (username != "None"){
+          document.getElementById("loginLink").innerHTML = "Signout";
+          document.getElementById("loginLink").setAttribute('href', 'javascript:void(0)');
+          document.getElementById("loginLink").setAttribute('onclick', 'askBackendToSignout()');
+        }
+      });
+      function askBackendToSignout() {
+        fetch('/signout', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Signed out successfully');
+            location.reload();
+          } else {
+            console.error('Signout failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error during signout:', error);
+        });
+      }
+
+      // Sends a request to the backend to delete the past chat summaries
+      function clearAIMemory() {
+        fetch('/clearAIMemory', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('memory cleared');
+            location.reload();
+          } else {
+            console.error('memory clear failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error during signout:', error);
+        });
+      }
+
+      //Toggles the hamburger
+      function toggleMenu() {
+        const hamburger = document.querySelector(".hamburger");
+        const menu = document.querySelector(".menu");
+
+        hamburger.classList.toggle("active");
+        menu.classList.toggle("active");
+      }
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" || event.keyCode === 27) {
+          toggleMenu();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="menu">
+      <a href="/">Chat</a>
+      <br />
+      <a id="loginLink" href="/loginAndSignup">Signup/Login</a>
+      <br />
+      <a href="https://github.com/Joseph-Cardona/Sapien-AI-Tutor" target="_blank" rel="noopener noreferrer">Github</a>
+      <br />
+      <a href="/credits">Credits</a>
+      <br />
+      <a href="/tos">Terms Of Service</a>
+      <br />
+      <a href="javascript:void(0)" onclick="clearAIMemory()">Clear Memory</a>
+      <br />
+      <a href="mailto:josephmcardona@gmail.com">Support</a>
+    </div>
+
+    <img id="logoIcon" src="https://cdn.glitch.global/33cb8556-d0b1-40db-97ce-14ac635dfeba/Sapian-AI-Tutor-Logo-PNG-Cropped.png?v=1740274895162"/>
+
+    <h1>Credits</h1>
+  </body>
+</html>

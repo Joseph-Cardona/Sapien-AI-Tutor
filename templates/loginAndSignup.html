@@ -170,9 +170,7 @@
           document.getElementById("loginLink").innerHTML = "Signout";
           document.getElementById("loginLink").setAttribute('href', 'javascript:void(0)');
           document.getElementById("loginLink").setAttribute('onclick', 'askBackendToSignout()');
-        } else {
-          document.getElementById("initialMessage").innerHTML = "<strong>Sapien:</strong> Please login before using the AI.";
-        };
+        }
       });
       function askBackendToSignout() {
         fetch('/signout', {
