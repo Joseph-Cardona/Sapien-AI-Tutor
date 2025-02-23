@@ -1,7 +1,7 @@
 {pkgs}: {
   deps = [
-    pkgs.espeak-ng
     pkgs.tesseract
+    pkgs.espeak-ng
     pkgs.libGLU
     pkgs.libGL
     pkgs.rustc
