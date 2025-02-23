@@ -14,6 +14,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sapien AI Tutor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -48,6 +49,12 @@
         overflow: auto;
         background-color: white;
       }
+      @media only screen and (max-width: 600px) {
+        #chat {
+          left: 60px;
+          right: 60px;
+        }
+      }
 
       #inputMenu {
         position: fixed;
@@ -66,6 +73,9 @@
         padding: 5px;
         margin: 0px;
         height: 35px;
+      }
+      button {
+        color: black;
       }
       .inputMenuButton {
         background-color: white;
@@ -114,6 +124,11 @@
         padding: 12px 16px;
         text-decoration: none;
         display: block;
+      }
+
+      a:visited {
+        color: black;
+        text-decoration: none;
       }
 
       .dropdown-content a:hover {
@@ -423,11 +438,11 @@
       <br />
       <a id="loginLink" href="/loginAndSignup">Signup/Login</a>
       <br />
-      <a href="/">Github</a>
+      <a href="https://github.com/Joseph-Cardona/Sapien-AI-Tutor" target="_blank" rel="noopener noreferrer">Github</a>
       <br />
-      <a href="/">Credits</a>
+      <a href="/credits">Credits</a>
       <br />
-      <a href="/">Terms Of Service</a>
+      <a href="/tos">Terms Of Service</a>
       <br />
       <a href="javascript:void(0)" onclick="clearAIMemory()">Clear Memory</a>
       <br />

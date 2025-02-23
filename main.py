@@ -1,15 +1,9 @@
 from flask import Flask, render_template, request, jsonify, make_response, g
 from markupsafe import escape
 from flask_wtf.csrf import CSRFProtect
-from flask import send_from_directory
-import json
-import ast
 import os
 import bcrypt
-import speech_recognition as sr
 import pyttsx3
-import cv2
-import pytesseract
 import openai
 from datetime import date
 from supabase import create_client, Client
