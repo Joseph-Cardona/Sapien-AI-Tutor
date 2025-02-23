@@ -53,6 +53,19 @@ def signout():
     response.delete_cookie('userLogin')
     return response
 
+@app.route("/clearAIMemory")
+@csrf.exempt 
+def clearAIMemory():
+    db = get_db()
+    username = request.cookies.get("userLogin")
+    clearChatSummary = (
+        db.table('loginInfo')
+        .update({"chatSummary": " "})
+        .eq('username', username)
+        .execute()
+    )
+    return "works, yay"
+
 @app.route('/process_string', methods=['POST'])
 @csrf.exempt 
 def process_string():

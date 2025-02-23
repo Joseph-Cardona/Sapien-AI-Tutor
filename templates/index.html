@@ -253,7 +253,7 @@
       function askBackendToSignout() {
         fetch('/signout', {
           method: 'GET',
-          credentials: 'include' // This ensures cookies are sent with the request
+          credentials: 'include'
         })
         .then(response => {
           if (response.ok) {
@@ -261,6 +261,25 @@
             location.reload();
           } else {
             console.error('Signout failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error during signout:', error);
+        });
+      }
+
+      // Sends a request to the backend to delete the past chat summaries
+      function clearAIMemory() {
+        fetch('/clearAIMemory', {
+          method: 'GET',
+          credentials: 'include'
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('memory cleared');
+            location.reload();
+          } else {
+            console.error('memory clear failed');
           }
         })
         .catch(error => {
@@ -409,6 +428,8 @@
       <a href="/">Credits</a>
       <br />
       <a href="/">Terms Of Service</a>
+      <br />
+      <a href="javascript:void(0)" onclick="clearAIMemory()">Clear Memory</a>
       <br />
       <a href="mailto:josephmcardona@gmail.com">Support</a>
     </div>
