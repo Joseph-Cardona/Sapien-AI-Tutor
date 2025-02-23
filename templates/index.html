@@ -236,7 +236,7 @@
           document.getElementById("loginLink").setAttribute('href', 'javascript:void(0)');
           document.getElementById("loginLink").setAttribute('onclick', 'askBackendToSignout()');
         } else {
-          console.log("user is not logged in");
+          document.getElementById("initialMessage").innerHTML = "Sapien: Please login before using the AI.";
         };
       });
       function askBackendToSignout() {
@@ -399,7 +399,7 @@
     </div>
 
     <div id="chat">
-      <p class="outputMessage">Sapien: What can I help you with today?</p>
+      <p class="outputMessage" id="initialMessage">Sapien: What can I help you with today?</p>
     </div>
     <div id="inputMenu">
       <div id="chatForm">
