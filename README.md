@@ -1,5 +1,4 @@
 # Sapien AI Tutor
-## https://sapien-ai-tutor.replit.app/
 ## By: Joseph Cardona, Parham Yussefi, & Aaron Lam
 
 Who are we?
